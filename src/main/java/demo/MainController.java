@@ -20,7 +20,7 @@ public class MainController {
     @Autowired
     private TrackRepository trackRepository;
     @Autowired
-    private TrackRepository roomRepository;
+    private RoomRepository roomRepository;
 
     @GetMapping(path="/persons", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Iterable<Person>> getPersons() {
@@ -145,10 +145,13 @@ public class MainController {
     }
 
     @PostMapping(path="/tracks", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<Void> addTrack (String title, String description, long speakerId) {
+    public ResponseEntity<Void> addTrack (String title, String description, long speakerId,long roomId) {
         Optional<Person> speaker = personRepository.findById(speakerId);
+        Optional<Room> room = roomRepository.findById(roomId);
+
         if(speaker.isPresent()) {
-            Track track = new Track(title, description, speaker.get(), locationRoom.get());
+           // Track track = new Track(title, description, speaker.get(), locationRoom.get() );
+            Track track = new Track(title, description, speaker.get(), room.get() );
             trackRepository.save(track);
             URI uri = WebMvcLinkBuilder.linkTo(MainController.class).slash("tracks").slash(track.getId()).toUri();
             return ResponseEntity.created(uri).build();
@@ -201,7 +204,9 @@ public class MainController {
 
     @GetMapping(path="/rooms", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Iterable<Room>> getRooms() {
-        Collection<Room> rooms = (Collection<Room>) roomRepository.findAll();
+       Collection<Room> rooms = (Collection<Room>) roomRepository.findAll();
+        // Collection<Room> rooms = (Collection<Room>) roomRepository.findAll();
+                //(Collection<Room>) roomRepository.findAll();
         if (!rooms.isEmpty()) {
             return ResponseEntity.ok(rooms);
         } else {
@@ -272,11 +277,11 @@ public class MainController {
    }
 
    @PostMapping(path="/rooms/{roomId}/tracks/{trackId}")
-   public ResponseEntity<Void> addRoomTrack(@PathVariable("roomnId") long Id, @PathVariable("trackId") long trackId) {
+   public ResponseEntity<Void> addRoomTrack(@PathVariable("roomId") long roomId, @PathVariable("trackId") long trackId) {
        Optional<Room> room = roomRepository.findById(roomId);
        if (room.isPresent()) {
            Optional<Track> track = trackRepository.findById(trackId);
-           if(track.isPresent() && track.get().getLocations().getId() != roomId) {
+           if(track.isPresent() && track.get().getLocationRoom().getId() != roomId) {
                room.get().addRoomTrack(track.get());
                roomRepository.save(room.get());
                return ResponseEntity.noContent().build();
@@ -295,7 +300,7 @@ public class MainController {
            Optional<Track> track = trackRepository.findById(trackId);
            if(track.isPresent()) {
                room.get().removeRoomTrack(track.get());
-               roomnRepository.save(room.get());
+               roomRepository.save(room.get());
                return ResponseEntity.noContent().build();
            } else {
                return ResponseEntity.badRequest().build();
