@@ -18,7 +18,7 @@ public class Room {
             name = "location",
             joinColumns = @JoinColumn(name = "room_id"),
             inverseJoinColumns = @JoinColumn(name = "track_id"))
-    private Set<Track> tracks;
+    private Set<Room> rooms;
 
 
     public Room() {
@@ -35,15 +35,15 @@ public class Room {
         return number;
     }
 
-    public Set<Track> getTracks() {
-        return tracks;
+    public Set<Room> getRooms() {
+        return rooms;
     }
 
-    public void addRoomTrack(Track track) {
-        tracks.add(track);
+    public void addRoomTrack(Room room) {
+        rooms.add(room);
     }
-    public void removeRoomTrack(Track track) {
-        tracks.remove(track);
+    public void removeRoomTrack(Room room) {
+        rooms.remove(room);
     }
 
     public void update(Room room) {
